@@ -8,21 +8,15 @@ namespace SpellWork
     {
         public Loader()
         {
-            DBC.DBC.AreaGroup = DBCReader.ReadDBC<AreaGroupEntry>(null);
             DBC.DBC.AreaTable = DBCReader.ReadDBC<AreaTableEntry>(DBC.DBC.AreaStrings);
-            DBC.DBC.OverrideSpellData = DBCReader.ReadDBC<OverrideSpellDataEntry>(null);
-            DBC.DBC.ScreenEffect = DBCReader.ReadDBC<ScreenEffectEntry>(DBC.DBC.ScreenEffectStrings);
             DBC.DBC.SkillLine = DBCReader.ReadDBC<SkillLineEntry>(DBC.DBC.SkillLineStrings);
             DBC.DBC.SkillLineAbility = DBCReader.ReadDBC<SkillLineAbilityEntry>(null);
             DBC.DBC.Spell = DBCReader.ReadDBC<SpellEntry>(DBC.DBC.SpellStrings);
             DBC.DBC.SpellCastTimes = DBCReader.ReadDBC<SpellCastTimesEntry>(null);
-            DBC.DBC.SpellDifficulty = DBCReader.ReadDBC<SpellDifficultyEntry>(null);
             DBC.DBC.SpellDuration = DBCReader.ReadDBC<SpellDurationEntry>(null);
             DBC.DBC.SpellRadius = DBCReader.ReadDBC<SpellRadiusEntry>(null);
             DBC.DBC.SpellRange = DBCReader.ReadDBC<SpellRangeEntry>(DBC.DBC.SpellRangeStrings);
-            DBC.DBC.SpellMissile = DBCReader.ReadDBC<SpellMissileEntry>(null);
             DBC.DBC.SpellMissileMotion = DBCReader.ReadDBC<SpellMissileMotionEntry>(DBC.DBC.SpellMissileMotionStrings);
-            DBC.DBC.SpellVisual = DBCReader.ReadDBC<SpellVisualEntry>(null);
 
             DBC.DBC.Locale = DetectedLocale;
         }

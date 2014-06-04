@@ -34,7 +34,8 @@ namespace SpellWork.DBC
     public struct SpellEntry
     {
         public uint ID;                                           // 0        m_ID
-        public uint Category;                                     // 1        m_category
+        public uint Category;                                   // 1        m_category
+        public uint CastUI;
         public uint Dispel;                                       // 2        m_dispelType
         public uint Mechanic;                                     // 3        m_mechanic
         public uint Attributes;                                   // 4        m_attribute
@@ -43,10 +44,9 @@ namespace SpellWork.DBC
         public uint AttributesEx3;                                // 7        m_attributesExC
         public uint AttributesEx4;                                // 8        m_attributesExD
         public uint AttributesEx5;                                // 9        m_attributesExE
-        public uint AttributesEx6;                                // 10       m_attributesExF
-        public uint AttributesEx7;                                // 11       3.2.0 (0x20 - totems, 0x4 - paladin auras, etc...)
-        public ulong Stances;                                     // 12-13    m_shapeshiftMask
-        public ulong StancesNot;                                  // 14-15    m_shapeshiftExclude
+        public uint AttributesEx6;                                // 11       3.2.0 (0x20 - totems, 0x4 - paladin auras, etc...)
+        public uint Stances;                                      // 12-13    m_shapeshiftMask
+        public uint StancesNot;                                   // 14-15    m_shapeshiftExclude
         public uint Targets;                                      // 16       m_targets
         public uint TargetCreatureType;                           // 17       m_targetCreatureType
         public uint RequiresSpellFocus;                           // 18       m_requiresSpellFocus
@@ -55,10 +55,6 @@ namespace SpellWork.DBC
         public uint TargetAuraState;                              // 21       m_targetAuraState
         public uint CasterAuraStateNot;                           // 22       m_excludeCasterAuraState
         public uint TargetAuraStateNot;                           // 23       m_excludeTargetAuraState
-        public uint CasterAuraSpell;                              // 24       m_casterAuraSpell
-        public uint TargetAuraSpell;                              // 25       m_targetAuraSpell
-        public uint ExcludeCasterAuraSpell;                       // 26       m_excludeCasterAuraSpell
-        public uint ExcludeTargetAuraSpell;                       // 27       m_excludeTargetAuraSpell
         public uint CastingTimeIndex;                             // 28       m_castingTimeIndex
         public uint RecoveryTime;                                 // 29       m_recoveryTime
         public uint CategoryRecoveryTime;                         // 30       m_categoryRecoveryTime
@@ -94,6 +90,13 @@ namespace SpellWork.DBC
         public uint[] Effect;                                       // 71-73    m_effect
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = DBC.MaxEffectIndex)]
         public int[] EffectDieSides;                              // 74-76    m_effectDieSides
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = DBC.MaxEffectIndex)]
+        public uint[] EffectBaseDice;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = DBC.MaxEffectIndex)]
+        public float[] EffectDicePerLevel;
+        
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = DBC.MaxEffectIndex)]
         public float[] EffectRealPointsPerLevel;                  // 77-79    m_effectRealPointsPerLevel
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = DBC.MaxEffectIndex)]
@@ -124,12 +127,6 @@ namespace SpellWork.DBC
         public uint[] EffectTriggerSpell;                         // 116-118  m_effectTriggerSpell
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = DBC.MaxEffectIndex)]
         public float[] EffectPointsPerComboPoint;                 // 119-121  m_effectPointsPerCombo
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = DBC.MaxEffectIndex)]
-        public uint[] EffectSpellClassMaskA;                      // 122-124  m_effectSpellClassMaskA, effect 0
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = DBC.MaxEffectIndex)]
-        public uint[] EffectSpellClassMaskB;                      // 125-127  m_effectSpellClassMaskB, effect 1
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = DBC.MaxEffectIndex)]
-        public uint[] EffectSpellClassMaskC;                      // 128-130  m_effectSpellClassMaskC, effect 2
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
         public uint[] SpellVisual;                                // 131-132  m_spellVisualID
         public uint SpellIconID;                                  // 133      m_spellIconID
@@ -152,7 +149,7 @@ namespace SpellWork.DBC
         public uint StartRecoveryTime;                            // 206      m_startRecoveryTime
         public uint MaxTargetLevel;                               // 207      m_maxTargetLevel
         public uint SpellFamilyName;                              // 208      m_spellClassSet
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
         public uint[] SpellFamilyFlags;                           // 209-211  m_spellClassMask
         public uint MaxAffectedTargets;                           // 212      m_maxTargets
         public uint DmgClass;                                     // 213      m_defenseType
@@ -167,13 +164,6 @@ namespace SpellWork.DBC
         public uint[] TotemCategory;                              // 222-223  m_requiredTotemCategoryID
         public int  AreaGroupId;                                  // 224      m_requiredAreaGroupId
         public uint SchoolMask;                                   // 225      m_schoolMask
-        public uint RuneCostID;                                   // 226      m_runeCostID
-        public uint SpellMissileID;                               // 227      m_spellMissileID not used
-        public uint PowerDisplayId;                               // 228      PowerDisplay.dbc, new in 3.1
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = DBC.MaxEffectIndex)]
-        public float[] DamageCoeficient;                          // 229-231  3.2.0
-        public uint SpellDescriptionVariableID;                   // 232      3.2.0
-        public uint SpellDifficultyId;                            // 233      3.3.0                           // 239      3.3.0
 
         /// <summary>
         /// Return current Spell Name
@@ -250,8 +240,8 @@ namespace SpellWork.DBC
                 var range = DBC.SpellRange[RangeIndex];
                 var sb = new StringBuilder();
                 sb.AppendFormatLine("SpellRange: (Id {0}) \"{1}\":", range.Id, range.Description1);
-                sb.AppendFormatLine("    MinRange = {0}, MinRangeFriendly = {1}", range.MinRange, range.MinRangeFriendly);
-                sb.AppendFormatLine("    MaxRange = {0}, MaxRangeFriendly = {1}", range.MaxRange, range.MaxRangeFriendly);
+                sb.AppendFormatLine("    MinRange = {0}", range.MinRange);
+                sb.AppendFormatLine("    MaxRange = {0}", range.MaxRange);
 
                 return sb.ToString();
             }
@@ -301,10 +291,6 @@ namespace SpellWork.DBC
         public uint[] InternalDescription;                         // 20-35    m_description_lang
         public uint DescriptionFlags;                              // 36
         public uint SpellIcon;                                     // 37       m_spellIconID
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-        public uint[] InternalAlternateVerb;                       // 38-53    m_alternateVerb_lang
-        public uint AlternateVerbFlags;                            // 54
-        public uint CanLink;                                       // 55       m_canLink (prof. with recipes
 
         public string Name
         {
@@ -314,11 +300,6 @@ namespace SpellWork.DBC
         public string Description
         {
             get { return DBC.SkillLineStrings.GetValue(InternalDescription[(uint)DBC.Locale]); }
-        }
-
-        public string AlternateVerb
-        {
-            get { return DBC.SkillLineStrings.GetValue(InternalAlternateVerb[(uint)DBC.Locale]); }
         }
     };
 
@@ -338,6 +319,7 @@ namespace SpellWork.DBC
         public uint MinValue;                                       // 11       m_trivialSkillLineRankLow
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
         public uint[] CharacterPoints;                              // 12-13    m_characterPoints[2]
+        public uint ReqTrainPoints;
     };
 
     public struct SpellRadiusEntry
@@ -352,9 +334,7 @@ namespace SpellWork.DBC
     {
         public uint  Id;
         public float MinRange;
-        public float MinRangeFriendly;
         public float MaxRange;
-        public float MaxRangeFriendly;
         public uint  Field5;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
         public uint[] Desc1;
@@ -394,68 +374,6 @@ namespace SpellWork.DBC
         public int   MinCastTime;
     };
 
-    public struct SpellDifficultyEntry
-    {
-        public uint  Id;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-        public int[] SpellId;
-    };
-
-    public struct ScreenEffectEntry
-    {
-        public uint Id;
-        public uint InternalName;
-        public uint Unk0;
-        public float Unk1;
-        public uint Unk2;
-        public uint Unk3;           // % of smth?
-        public uint Unk4;           // all 0
-        public int Unk5;
-        public uint Unk6;
-        public uint Unk7;
-
-        public string Name
-        {
-            get { return DBC.ScreenEffectStrings.GetValue(InternalName); }
-        }
-    };
-
-    public struct SpellVisualEntry
-    {
-        public uint Id;
-        public uint PrecastKit;
-        public uint CastingKit;
-        public uint ImpactKit;
-        public uint StateKit;
-        public uint StateDoneKit;
-        public uint ChannelKit;
-        public int HasMissile;
-        public uint MissileModel;
-        public uint MissilePathType;
-        public uint MissileDestinationAttachment;
-        public uint MissileSound;
-        public uint AnimEventSoundID;
-        public uint Flags;
-        public uint CasterImpactKit;
-        public uint TargetImpactKit;
-        public int MissileAttachment;
-        public uint MissileFollowGroundHeight;
-        public uint MissileFollowGroundDropSpeed;
-        public uint MissileFollowGroundApprach;
-        public uint MissileFollowGroundFlags;
-        public uint MissileMotionId;
-        public uint MissileTargetingKit;
-        public uint InstantAreaKit;
-        public uint ImpactAreaKit;
-        public uint PersistentAreaKit;
-        public float MissileCastOffsetX;
-        public float MissileCastOffsetY;
-        public float MissileCastOffsetZ;
-        public float MissileImpactOffsetX;
-        public float MissileImpactOffsetY;
-        public float MissileImpactOffsetZ;
-    };
-
     public struct SpellMissileMotionEntry
     {
         public uint Id;
@@ -473,42 +391,6 @@ namespace SpellWork.DBC
         {
             get { return DBC.SpellMissileMotionStrings.GetValue(_Script); }
         }
-    };
-
-    public struct SpellMissileEntry
-    {
-        public uint Id;
-        public uint Flags;
-        public float defaultPitchMin;
-        public float defaultPitchMax;
-        public float defaultSpeedMin;
-        public float defaultSpeedMax;
-        public float randomizeFacingMin;
-        public float randomizeFacingMax;
-        public float randomizePitchMin;
-        public float randomizePitchMax;
-        public float randomizeSpeedMin;
-        public float randomizeSpeedMax;
-        public float gravity;
-        public float maxDuration;
-        public float collisionRadius;
-    };
-
-    public struct OverrideSpellDataEntry
-    {
-        public uint Id;
-        // Value 10 also used in SpellInfo.AuraModTypeName
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
-        public uint[] Spells;
-        public uint Unk;
-    };
-
-    public struct AreaGroupEntry
-    {
-        public uint AreaGroupId;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
-        public uint[] AreaId;
-        public uint NextGroup;
     };
 
     public struct AreaTableEntry
@@ -534,7 +416,6 @@ namespace SpellWork.DBC
         public uint LiquidType4;
         public float MinElevation;
         public float AmbientMultiplier;
-        public uint Light;
 
         public string Name
         {

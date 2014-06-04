@@ -5,7 +5,7 @@ namespace SpellWork.DBC
 {
     public static class DBC
     {
-        public const string Version = "SpellWork 3.3.5a (12340)";
+        public const string Version = "SpellWork 2.4.3 (8606)";
         public const string DbcPath = @"dbc";
 
         public const int MaxDbcLocale                 = 16;
@@ -13,18 +13,12 @@ namespace SpellWork.DBC
         public const int MaxEffectIndex               = 3;
         public const int SpellEntryForDetectLocale    = 1;
 
-        public static Dictionary<uint, AreaGroupEntry>              AreaGroup;
         public static Dictionary<uint, AreaTableEntry>              AreaTable;
-        public static Dictionary<uint, OverrideSpellDataEntry>      OverrideSpellData;
-        public static Dictionary<uint, ScreenEffectEntry>           ScreenEffect;
         public static Dictionary<uint, SpellMissileMotionEntry>     SpellMissileMotion;
-        public static Dictionary<uint, SpellMissileEntry>           SpellMissile;
-        public static Dictionary<uint, SpellVisualEntry>            SpellVisual;
         public static Dictionary<uint, SkillLineAbilityEntry>       SkillLineAbility;
         public static Dictionary<uint, SkillLineEntry>              SkillLine;
         public static Dictionary<uint, SpellEntry>                  Spell;
         public static Dictionary<uint, SpellCastTimesEntry>         SpellCastTimes;
-        public static Dictionary<uint, SpellDifficultyEntry>        SpellDifficulty;
         public static Dictionary<uint, SpellDurationEntry>          SpellDuration;
         public static Dictionary<uint, SpellRadiusEntry>            SpellRadius;
         public static Dictionary<uint, SpellRangeEntry>             SpellRange;

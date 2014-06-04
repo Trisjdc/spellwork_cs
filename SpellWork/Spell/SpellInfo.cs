@@ -41,8 +41,8 @@ namespace SpellWork.Spell
             _rtb.AppendFormatLine("Category = {0}, SpellIconID = {1}, activeIconID = {2}, SpellVisual = ({3},{4})",
                 _spell.Category, _spell.SpellIconID, _spell.ActiveIconID, _spell.SpellVisual[0], _spell.SpellVisual[1]);
 
-            _rtb.AppendFormatLine("Family {0}, flag [0] 0x{1:X8} [1] 0x{2:X8} [2] 0x{3:X8}",
-                (SpellFamilyNames)_spell.SpellFamilyName, _spell.SpellFamilyFlags[0], _spell.SpellFamilyFlags[1], _spell.SpellFamilyFlags[2]);
+            _rtb.AppendFormatLine("Family {0}, flag [0] 0x{1:X8} [1] 0x{2:X8}",
+                (SpellFamilyNames)_spell.SpellFamilyName, _spell.SpellFamilyFlags[0], _spell.SpellFamilyFlags[1]);
 
             _rtb.AppendLine();
 
@@ -51,7 +51,7 @@ namespace SpellWork.Spell
             _rtb.AppendFormatLine("PreventionType = {0} ({1})", _spell.PreventionType, (SpellPreventionType)_spell.PreventionType);
 
             if (_spell.Attributes != 0 || _spell.AttributesEx != 0 || _spell.AttributesEx2 != 0 || _spell.AttributesEx3 != 0
-                || _spell.AttributesEx4 != 0 || _spell.AttributesEx5 != 0 || _spell.AttributesEx6 != 0 || _spell.AttributesEx7 != 0)
+                || _spell.AttributesEx4 != 0 || _spell.AttributesEx5 != 0 || _spell.AttributesEx6 != 0)
                 _rtb.AppendLine(_line);
 
             if (_spell.Attributes != 0)
@@ -68,8 +68,6 @@ namespace SpellWork.Spell
                 _rtb.AppendFormatLine("AttributesEx5: 0x{0:X8} ({1})", _spell.AttributesEx5, (SpellAtributeEx5)_spell.AttributesEx5);
             if (_spell.AttributesEx6 != 0)
                 _rtb.AppendFormatLine("AttributesEx6: 0x{0:X8} ({1})", _spell.AttributesEx6, (SpellAtributeEx6)_spell.AttributesEx6);
-            if (_spell.AttributesEx7 != 0)
-                _rtb.AppendFormatLine("AttributesEx7: 0x{0:X8} ({1})", _spell.AttributesEx7, (SpellAtributeEx7)_spell.AttributesEx7);
 
             _rtb.AppendLine(_line);
 
@@ -189,10 +187,6 @@ namespace SpellWork.Spell
             if (_spell.MaxAffectedTargets != 0)
                 _rtb.AppendFormatLine("MaxAffectedTargets = {0}", _spell.MaxAffectedTargets);
 
-            AppendSpellAura();
-
-            AppendAreaInfo();
-
             _rtb.AppendFormatLineIfNotNull("Requires Spell Focus {0}", _spell.RequiresSpellFocus);
 
             if (_spell.ProcFlags != 0)
@@ -211,58 +205,7 @@ namespace SpellWork.Spell
 
             AppendSpellEffectInfo();
             AppendItemInfo();
-            AppendDifficultyInfo();
-
-            AppendSpellVisualInfo();
         }
-
-        private void AppendSpellVisualInfo()
-        {
-            SpellVisualEntry visualData;
-            if (!DBC.DBC.SpellVisual.TryGetValue(_spell.SpellVisual[0], out visualData))
-                return;
-
-            SpellMissileEntry missileEntry;
-            SpellMissileMotionEntry missileMotionEntry;
-            var hasMissileEntry = DBC.DBC.SpellMissile.TryGetValue(visualData.MissileModel, out missileEntry);
-            var hasMissileMotion = DBC.DBC.SpellMissileMotion.TryGetValue(visualData.MissileMotionId, out missileMotionEntry);
-
-            if (!hasMissileEntry && !hasMissileMotion)
-                return;
-
-            _rtb.AppendLine(_line);
-            _rtb.SetBold();
-            _rtb.AppendLine("Missile data");
-            _rtb.SetDefaultStyle();
-
-            // Missile Model Data.
-            if (hasMissileEntry)
-            {
-                _rtb.AppendFormatLine("Missile Model ID: {0}", visualData.MissileModel);
-                _rtb.AppendFormatLine("Missile attachment: {0}", visualData.MissileAttachment);
-                _rtb.AppendFormatLine("Missile cast offset: X:{0} Y:{1} Z:{2}", visualData.MissileCastOffsetX, visualData.MissileCastOffsetY, visualData.MissileCastOffsetZ);
-                _rtb.AppendFormatLine("Missile impact offset: X:{0} Y:{1} Z:{2}", visualData.MissileImpactOffsetX, visualData.MissileImpactOffsetY, visualData.MissileImpactOffsetZ);
-                _rtb.AppendFormatLine("MissileEntry ID: {0}", missileEntry.Id);
-                _rtb.AppendFormatLine("Collision Radius: {0}", missileEntry.collisionRadius);
-                _rtb.AppendFormatLine("Default Pitch: {0} - {1}", missileEntry.defaultPitchMin, missileEntry.defaultPitchMax);
-                _rtb.AppendFormatLine("Random Pitch: {0} - {1}", missileEntry.randomizePitchMax, missileEntry.randomizePitchMax);
-                _rtb.AppendFormatLine("Default Speed: {0} - {1}", missileEntry.defaultSpeedMin, missileEntry.defaultSpeedMax);
-                _rtb.AppendFormatLine("Randomize Speed: {0} - {1}", missileEntry.randomizeSpeedMin, missileEntry.randomizeSpeedMax);
-                _rtb.AppendFormatLine("Gravity: {0}", missileEntry.gravity);
-                _rtb.AppendFormatLine("Maximum duration:", missileEntry.maxDuration);
-                _rtb.AppendLine("");
-            }
-
-            // Missile Motion Data.
-            if (hasMissileMotion)
-            {
-                _rtb.AppendFormatLine("Missile motion: {0}", missileMotionEntry.Name);
-                _rtb.AppendFormatLine("Missile count: {0}", missileMotionEntry.MissileCount);
-                _rtb.AppendLine("Missile Script body:");
-                _rtb.AppendText(missileMotionEntry.Script);
-            }
-        }
-
         private void AppendSkillLine()
         {
             var query = from skillLineAbility in DBC.DBC.SkillLineAbility
@@ -333,45 +276,6 @@ namespace SpellWork.Spell
 
                 AuraModTypeName(effectIndex);
 
-                var classMask = new uint[3];
-
-                switch (effectIndex)
-                {
-                    case 0: classMask = _spell.EffectSpellClassMaskA; break;
-                    case 1: classMask = _spell.EffectSpellClassMaskB; break;
-                    case 2: classMask = _spell.EffectSpellClassMaskC; break;
-                }
-
-                if (classMask[0] != 0 || classMask[1] != 0 || classMask[2] != 0)
-                {
-                    _rtb.AppendFormatLine("SpellClassMask = {0:X8} {1:X8} {2:X8}", classMask[0], classMask[1], classMask[2]);
-
-                    var query = from spell in DBC.DBC.Spell.Values
-                                where spell.SpellFamilyName == _spell.SpellFamilyName && spell.SpellFamilyFlags.ContainsElement(classMask)
-                                join sk in DBC.DBC.SkillLineAbility on spell.ID equals sk.Value.SpellId into temp
-                                from skill in temp.DefaultIfEmpty()
-                                select new
-                                {
-                                    SpellID   = spell.ID,
-                                    SpellName = spell.SpellNameRank, skill.Value.SkillId
-                                };
-
-                    foreach (var row in query)
-                    {
-                        if (row.SkillId > 0)
-                        {
-                            _rtb.SelectionColor = Color.Blue;
-                            _rtb.AppendFormatLine("\t+ {0} - {1}",  row.SpellID, row.SpellName);
-                        }
-                        else
-                        {
-                            _rtb.SelectionColor = Color.Red;
-                            _rtb.AppendFormatLine("\t- {0} - {1}", row.SpellID, row.SpellName);
-                        }
-                        _rtb.SelectionColor = Color.Black;
-                    }
-                }
-
                 _rtb.AppendFormatLineIfNotNull("{0}", _spell.GetRadius(effectIndex));
 
                 // append trigger spell
@@ -408,43 +312,6 @@ namespace SpellWork.Spell
 
                 _rtb.AppendLine();
             }
-        }
-
-        private void AppendSpellAura()
-        {
-            if (_spell.CasterAuraSpell != 0)
-            {
-                if (DBC.DBC.Spell.ContainsKey(_spell.CasterAuraSpell))
-                    _rtb.AppendFormatLine("  Caster Aura Spell ({0}) {1}", _spell.CasterAuraSpell, DBC.DBC.Spell[_spell.CasterAuraSpell].SpellName);
-                else
-                    _rtb.AppendFormatLine("  Caster Aura Spell ({0}) ?????", _spell.CasterAuraSpell);
-            }
-
-            if (_spell.TargetAuraSpell != 0)
-            {
-                if (DBC.DBC.Spell.ContainsKey(_spell.TargetAuraSpell))
-                    _rtb.AppendFormatLine("  Target Aura Spell ({0}) {1}", _spell.TargetAuraSpell, DBC.DBC.Spell[_spell.TargetAuraSpell].SpellName);
-                else
-                    _rtb.AppendFormatLine("  Target Aura Spell ({0}) ?????", _spell.TargetAuraSpell);
-            }
-
-            if (_spell.ExcludeCasterAuraSpell != 0)
-            {
-                if (DBC.DBC.Spell.ContainsKey(_spell.ExcludeCasterAuraSpell))
-                    _rtb.AppendFormatLine("  Ex Caster Aura Spell ({0}) {1}", _spell.ExcludeCasterAuraSpell, DBC.DBC.Spell[_spell.ExcludeCasterAuraSpell].SpellName);
-                else
-                    _rtb.AppendFormatLine("  Ex Caster Aura Spell ({0}) ?????", _spell.ExcludeCasterAuraSpell);
-            }
-
-            // ReSharper disable InvertIf
-            if (_spell.ExcludeTargetAuraSpell != 0)
-            {
-                if (DBC.DBC.Spell.ContainsKey(_spell.ExcludeTargetAuraSpell))
-                    _rtb.AppendFormatLine("  Ex Target Aura Spell ({0}) {1}", _spell.ExcludeTargetAuraSpell, DBC.DBC.Spell[_spell.ExcludeTargetAuraSpell].SpellName);
-                else
-                    _rtb.AppendFormatLine("  Ex Target Aura Spell ({0}) ?????", _spell.ExcludeTargetAuraSpell);
-            }
-            // ReSharper enable InvertIf
         }
 
         private void AuraModTypeName(int index)
@@ -485,113 +352,6 @@ namespace SpellWork.Spell
 
             _rtb.AppendFormat("), miscB = {0}", _spell.EffectMiscValueB[index]);
             _rtb.AppendFormatLine(", periodic = {0}", _spell.EffectAmplitude[index]);
-
-            switch (aura)
-            {
-                case AuraType.SPELL_AURA_OVERRIDE_SPELLS:
-                    if (!DBC.DBC.OverrideSpellData.ContainsKey((uint)misc))
-                    {
-                        _rtb.SetStyle(Color.Red, FontStyle.Bold);
-                        _rtb.AppendFormatLine("Cannot find key {0} in OverrideSpellData.dbc", (uint)misc);
-                    }
-                    else
-                    {
-                        _rtb.AppendLine();
-                        _rtb.SetStyle(Color.DarkRed, FontStyle.Bold);
-                        _rtb.AppendLine("Overriding Spells:");
-                        var @override = DBC.DBC.OverrideSpellData[(uint)misc];
-                        for (var i = 0; i < 10; ++i)
-                        {
-                            if (@override.Spells[i] == 0)
-                                continue;
-
-                            _rtb.SetStyle(Color.DarkBlue, FontStyle.Regular);
-                            _rtb.AppendFormatLine("\t - #{0} ({1}) {2}", i + 1, @override.Spells[i],
-                                DBC.DBC.Spell.ContainsKey(@override.Spells[i]) ? DBC.DBC.Spell[@override.Spells[i]].SpellName : "?????");
-                        }
-                        _rtb.AppendLine();
-                    }
-                    break;
-                case AuraType.SPELL_AURA_SCREEN_EFFECT:
-                    _rtb.SetStyle(Color.DarkBlue, FontStyle.Bold);
-                    _rtb.AppendFormatLine("ScreenEffect: {0}",
-                        DBC.DBC.ScreenEffect.ContainsKey((uint)misc) ? DBC.DBC.ScreenEffect[(uint)misc].Name : "?????");
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private void AppendDifficultyInfo()
-        {
-            var difficultyId = _spell.SpellDifficultyId;
-            if (difficultyId == 0)
-                return;
-
-            if (!DBC.DBC.SpellDifficulty.ContainsKey(difficultyId))
-            {
-                _rtb.AppendFormatLine("Cannot find difficulty overrides for id {0} in SpellDifficulty.dbc!", difficultyId);
-                return;
-            }
-
-            var modeNames = new[]
-            {
-                "Normal 10",
-                "Normal 25",
-                "Heroic 10",
-                "Heroic 25",
-            };
-
-            _rtb.SetBold();
-            _rtb.AppendLine("Spell difficulty Ids:");
-
-            var difficulty = DBC.DBC.SpellDifficulty[difficultyId];
-            for (var i = 0; i < 4; ++i)
-            {
-                if (difficulty.SpellId[i] <= 0)
-                    continue;
-
-                _rtb.AppendFormatLine("{0}: {1}", modeNames[i], difficulty.SpellId[i]);
-            }
-        }
-
-        private void AppendAreaInfo()
-        {
-            if (_spell.AreaGroupId <= 0)
-                return;
-
-            var areaGroupId = (uint)_spell.AreaGroupId;
-            if (!DBC.DBC.AreaGroup.ContainsKey(areaGroupId))
-            {
-                _rtb.AppendFormatLine("Cannot find area group id {0} in AreaGroup.dbc!", _spell.AreaGroupId);
-                return;
-            }
-
-            _rtb.AppendLine();
-            _rtb.SetBold();
-            _rtb.AppendLine("Allowed areas:");
-            while (DBC.DBC.AreaGroup.ContainsKey(areaGroupId))
-            {
-                var groupEntry = DBC.DBC.AreaGroup[areaGroupId];
-                for (var i = 0; i < 6; ++i)
-                {
-                    var areaId = groupEntry.AreaId[i];
-                    if (DBC.DBC.AreaTable.ContainsKey(areaId))
-                    {
-                        var areaEntry = DBC.DBC.AreaTable[areaId];
-                        _rtb.AppendFormatLine("{0} - {1} (Map: {2})", areaId, areaEntry.Name, areaEntry.MapId);
-                    }
-                }
-
-
-                if (groupEntry.NextGroup == 0)
-                    break;
-
-                // Try search in next group
-                areaGroupId = groupEntry.NextGroup;
-            }
-
-            _rtb.AppendLine();
         }
 
         private void AppendItemInfo()
