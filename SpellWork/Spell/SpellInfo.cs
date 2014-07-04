@@ -238,7 +238,7 @@ namespace SpellWork.Spell
             for (var effectIndex = 0; effectIndex < DBC.DBC.MaxEffectIndex; effectIndex++)
             {
                 _rtb.SetBold();
-                if ((SpellEffects)_spell.Effect[effectIndex] == SpellEffects.NO_SPELL_EFFECT)
+                if ((SpellEffects)_spell.Effect[effectIndex] == SpellEffects.SPELL_EFFECT_NONE)
                 {
                     _rtb.AppendFormatLine("Effect {0}:  NO EFFECT", effectIndex);
                     _rtb.AppendLine();
